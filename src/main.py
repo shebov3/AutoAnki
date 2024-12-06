@@ -124,14 +124,18 @@ def add_to_anki(word, sentence, furigana_sentence, image_path, audio, translatio
             }
         },
     }
-    try:
-        response = requests.post(url, json=payload)
-        print(response.json())
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Error adding to Anki for {word}: {e}")
-        return None
+    response = requests.post(url, json=payload)
 
+    try:
+        response_data = response.json()
+        if response_data.get('error'):  # If there's an error, print it
+            print(f"Error adding word '{word}': {response_data['error']}")
+        else:
+            print(f"Successfully added '{word}' to Anki.")
+    except Exception as e:
+        print(f"Error parsing Anki response for word '{word}': {e}")
+
+    return response_data
 def main():
     with open(file_path, "r", encoding="utf-8") as file:
         words = file.readlines()
