@@ -138,6 +138,7 @@ def main():
     
     for word in words:
         word = word.strip()
+        if len(word) == 0: continue
         word_data = fetch_word_data(word)
         if word_data:
             add_to_anki(*word_data)
