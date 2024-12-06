@@ -86,7 +86,7 @@ def fetch_clipboard_data(xpath):
 
 def bold_word_and_clean(sentence, furigana_sentence, word):
     lis = list(word)
-    furigana_match =  re.search(rf"({re.escape(lis[0])}.*?(\[.*?\])?{re.escape(lis[-1])})(\[.*?\])?", furigana_sentence) or re.search(rf"({re.escape(word)}\[[^\]]+\])", furigana_sentence)
+    furigana_match = re.search(rf"({re.escape(word)}\[[^\]]+\])", furigana_sentence) or re.search(rf"({re.escape(lis[0])}.*?(\[.*?\])?{re.escape(lis[-1])})(\[.*?\])?", furigana_sentence)
     word_furigana = furigana_match.group() if furigana_match else word
 
     
