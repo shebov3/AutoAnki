@@ -31,14 +31,14 @@ def download_file(file_url, file_extension):
         response.raise_for_status()
         with open(local_file_path, 'wb') as f:
             f.write(response.content)
-        print(f"Downloaded {file_extension}: {file_name}")
+        print(f"[#33ff77]Downloaded {file_extension}:[/] {file_name}")
         return file_name
     except requests.RequestException as e:
-        print(f"Failed to download {file_extension}: {file_url} | Error: {e}")
+        print(f"[#ff1144]Failed to download {file_extension}:[/] {file_url} | Error: {e}")
         return None
 
 def fetch_word_data(word):
-    print(f"[#5555ff]Searching For Word[/] [#55ff55]{word}..[/]")
+    print(f"[#2233ff]Searching For Word[/] [#33ff77]{word}[/]")
 
     driver.get(f"https://www.immersionkit.com/dictionary?keyword=「{word}」")
     
@@ -75,7 +75,7 @@ def fetch_word_data(word):
         return (word, sentence, furigana_sentence, local_image_name, local_audio_name, translation, word_meaning)
 
     except Exception as e:
-        print(f"[#ff5555]Error fetching data for {word}: {e}[/]")
+        print(f"[#ff1144]Error fetching data for {word}: {e}[/]")
         return None
 
 
@@ -129,11 +129,11 @@ def add_to_anki(word, sentence, furigana_sentence, image_path, audio, translatio
     try:
         response_data = response.json()
         if response_data.get('error'):  # If there's an error, print it
-            print(f"Error adding word '{word}': {response_data['error']}")
+            print(f"[#ff1144]Error adding word '{word}': {response_data['error']}[/]")
         else:
-            print(f"Successfully added '{word}' to Anki.")
+            print(f"[#33ff77]Successfully added '{word}' to Anki.[/]")
     except Exception as e:
-        print(f"Error parsing Anki response for word '{word}': {e}")
+        print(f"[#ff1144]Error parsing Anki response for word '{word}': {e}[/]")
 
     return response_data
 def main():
