@@ -52,7 +52,7 @@ def fetch_word_data(word):
 
         
         driver.execute_script("arguments[0].scrollIntoView();", target_element)
-        time.sleep(2)  
+        time.sleep(0.1)  
         target_element.click()
         
         
@@ -85,8 +85,8 @@ def fetch_clipboard_data(xpath):
     return pyperclip.paste()
 
 def bold_word_and_clean(sentence, furigana_sentence, word):
-    list = list(word)
-    furigana_match =  re.search(rf"({re.escape(list[0])}.*?(\[.*?\])?{re.escape(list[-1])})", furigana_sentence) or re.search(rf"({re.escape(word)}\[[^\]]+\])", furigana_sentence)
+    lis = list(word)
+    furigana_match =  re.search(rf"({re.escape(lis[0])}.*?(\[.*?\])?{re.escape(lis[-1])})(\[.*?\])?", furigana_sentence) or re.search(rf"({re.escape(word)}\[[^\]]+\])", furigana_sentence)
     word_furigana = furigana_match.group() if furigana_match else word
 
     
