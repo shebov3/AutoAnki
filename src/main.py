@@ -41,7 +41,6 @@ def fetch_word_data(word):
     print(f"[#5555ff]Searching For Word[/] [#55ff55]{word}..[/]")
 
     driver.get(f"https://www.immersionkit.com/dictionary?keyword=「{word}」")
-
     
     try:
         target_xpath = (
@@ -53,15 +52,16 @@ def fetch_word_data(word):
 
         
         driver.execute_script("arguments[0].scrollIntoView();", target_element)
-        time.sleep(0.1)  
+        time.sleep(2)  
         target_element.click()
         
         
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/div[1]/button[1]"))
         )
-        
-        
+
+        word_meaning = driver.find_element(By.XPATH, "/html/body/div/div[1]/div/div[2]/div[3]/div[1]")
+        word_meaning = re.search(rf"\((.*?)\)", word_meaning.text).group(1) 
         sentence = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/div[1]/button[1]")
         furigana_sentence = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/div[1]/button[2]")
         image_url = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/div[3]/button[1]")
@@ -72,7 +72,7 @@ def fetch_word_data(word):
         local_image_name = download_file(image_url, "image")
         local_audio_name = download_file(audio_url, "audio")
 
-        return (word, sentence, furigana_sentence, local_image_name, local_audio_name, translation)
+        return (word, sentence, furigana_sentence, local_image_name, local_audio_name, translation, word_meaning)
 
     except Exception as e:
         print(f"[#ff5555]Error fetching data for {word}: {e}[/]")
@@ -85,8 +85,8 @@ def fetch_clipboard_data(xpath):
     return pyperclip.paste()
 
 def bold_word_and_clean(sentence, furigana_sentence, word):
-    
-    furigana_match = re.search(rf"{re.escape(word)}\[(.*?)\]", furigana_sentence)
+    list = list(word)
+    furigana_match =  re.search(rf"({re.escape(list[0])}.*?(\[.*?\])?{re.escape(list[-1])})", furigana_sentence) or re.search(rf"({re.escape(word)}\[[^\]]+\])", furigana_sentence)
     word_furigana = furigana_match.group() if furigana_match else word
 
     
@@ -98,7 +98,7 @@ def bold_word_and_clean(sentence, furigana_sentence, word):
     
     return sentence_bolded, furigana_bolded, word_furigana
 
-def add_to_anki(word, sentence, furigana_sentence, image_path, audio, translation):
+def add_to_anki(word, sentence, furigana_sentence, image_path, audio, translation, word_meaning):
     sentence_bolded, furigana_bolded, word_furigana = bold_word_and_clean(sentence, furigana_sentence, word)
 
     
@@ -113,6 +113,7 @@ def add_to_anki(word, sentence, furigana_sentence, image_path, audio, translatio
                 "fields": {
                     "Word": word,
                     "Word Furigana": word_furigana,
+                    "Word Meaning": word_meaning,
                     "Sentence Meaning": translation,
                     "Word Audio": f"[sound:{os.path.basename(audio)}]",
                     "Picture": f"<img src='{os.path.basename(image_path)}'>",
@@ -135,15 +136,16 @@ def main():
     with open(file_path, "r", encoding="utf-8") as file:
         words = file.readlines()
 
-    
     for word in words:
         word = word.strip()
-        if len(word) == 0: continue
+        
+        if not word:
+            continue
+        
         word_data = fetch_word_data(word)
         if word_data:
             add_to_anki(*word_data)
 
-    
     driver.quit()
 
 if __name__ == "__main__":
