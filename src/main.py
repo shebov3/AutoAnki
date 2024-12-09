@@ -40,11 +40,11 @@ def download_file(file_url, file_extension):
 def fetch_word_data(word):
     print(f"[#2233ff]Searching For Word[/] [#33ff77]{word}[/]")
 
-    driver.get(f"https://www.immersionkit.com/dictionary?keyword=「{word}」")
+    driver.get(f"https://www.immersionkit.com/dictionary?keyword={word}")
     
     try:
         target_xpath = (
-            "/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]"
+            "/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]/div[1]"
             "//div[not(@class)]/div/a[1]"
         )
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, target_xpath)))
@@ -57,16 +57,15 @@ def fetch_word_data(word):
         
         
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/div[1]/button[1]"))
+            EC.presence_of_element_located((By.XPATH, "/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]/div[1]//div[not(@class)]/div[2]/div[1]/button[1]"))
         )
-
-        word_meaning = driver.find_element(By.XPATH, "/html/body/div/div[1]/div/div[2]/div[3]/div[1]")
+        word_meaning = driver.find_element(By.XPATH, "/html/body/div/div[1]/div/div[2]/div[4]/div[1]")
         word_meaning = re.search(rf"\((.*?)\)", word_meaning.text).group(1) 
-        sentence = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/div[1]/button[1]")
-        furigana_sentence = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/div[1]/button[2]")
-        image_url = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/div[3]/button[1]")
-        audio_url = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/div[3]/button[2]")
-        translation = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]//div[not(@class)]/div[2]/button")
+        sentence = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]/div[1]//div[not(@class)]/div[2]/div[1]/button[1]")
+        furigana_sentence = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]/div[1]//div[not(@class)]/div[2]/div[1]/button[2]")
+        image_url = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]/div[1]//div[not(@class)]/div[2]/div[3]/button[1]")
+        audio_url = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]/div[1]//div[not(@class)]/div[2]/div[3]/button[2]")
+        translation = fetch_clipboard_data("/html/body/div/div[1]/div/div[2]/div[@class='ui segment']/div/div[2]/div[3]/div[1]//div[not(@class)]/div[2]/button")
 
         
         local_image_name = download_file(image_url, "image")
@@ -128,7 +127,7 @@ def add_to_anki(word, sentence, furigana_sentence, image_path, audio, translatio
 
     try:
         response_data = response.json()
-        if response_data.get('error'):  # If there's an error, print it
+        if response_data.get('error'):
             print(f"[#ff1144]Error adding word '{word}': {response_data['error']}[/]")
         else:
             print(f"[#33ff77]Successfully added '{word}' to Anki.[/]")
