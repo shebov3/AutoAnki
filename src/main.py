@@ -50,9 +50,8 @@ def fetch_word_data(word):
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, target_xpath)))
         target_element = driver.find_element(By.XPATH, target_xpath)
 
-        
         driver.execute_script("arguments[0].scrollIntoView();", target_element)
-        time.sleep(0.1)  
+        time.sleep(0.1) 
         target_element.click()
         
         
@@ -98,34 +97,32 @@ def bold_word_and_clean(sentence, furigana_sentence, word):
     return sentence_bolded, furigana_bolded, word_furigana
 
 def add_to_anki(word, sentence, furigana_sentence, image_path, audio, translation, word_meaning):
-    sentence_bolded, furigana_bolded, word_furigana = bold_word_and_clean(sentence, furigana_sentence, word)
-
-    
-    url = "http://localhost:8765"
-    payload = {
-        "action": "addNote",
-        "version": 6,
-        "params": {
-            "note": {
-                "deckName": anki_deck_name,
-                "modelName": anki_model_name,
-                "fields": {
-                    "Word": word,
-                    "Word Furigana": word_furigana,
-                    "Word Meaning": word_meaning,
-                    "Sentence Meaning": translation,
-                    "Word Audio": f"[sound:{os.path.basename(audio)}]",
-                    "Picture": f"<img src='{os.path.basename(image_path)}'>",
-                    "Sentence Furigana": furigana_bolded,
-                    "Sentence": sentence_bolded,
-                },
-                "tags": ["auto-added"],
-            }
-        },
-    }
-    response = requests.post(url, json=payload)
-
     try:
+        sentence_bolded, furigana_bolded, word_furigana = bold_word_and_clean(sentence, furigana_sentence, word)
+
+        url = "http://localhost:8765"        
+        payload = {
+            "action": "addNote",
+            "version": 6,
+            "params": {
+                "note": {
+                    "deckName": anki_deck_name,
+                    "modelName": anki_model_name,
+                    "fields": {
+                        "Word": word,
+                        "Word Furigana": word_furigana,
+                        "Word Meaning": word_meaning,
+                        "Sentence Meaning": translation,
+                        "Word Audio": f"[sound:{os.path.basename(audio)}]",
+                        "Picture": f"<img src='{os.path.basename(image_path)}'>",
+                        "Sentence Furigana": furigana_bolded,
+                        "Sentence": sentence_bolded,
+                    },
+                    "tags": ["auto-added"],
+                }
+            },
+        }
+        response = requests.post(url, json=payload)
         response_data = response.json()
         if response_data.get('error'):
             print(f"[#ff1144]Error adding word '{word}': {response_data['error']}[/]")
@@ -138,16 +135,22 @@ def add_to_anki(word, sentence, furigana_sentence, image_path, audio, translatio
 def main():
     with open(file_path, "r", encoding="utf-8") as file:
         words = file.readlines()
-
+    failedWords = []
     for word in words:
         word = word.strip()
         
         if not word:
             continue
-        
         word_data = fetch_word_data(word)
         if word_data:
             add_to_anki(*word_data)
+            
+        else:
+            failedWords.append(word)
+    if len(failedWords) > 0:
+        print("[#ff1144]Words that failed to fetch:[/]")
+    for word in failedWords:
+        print(f"[#ff66ff]{word}[/]")
 
     driver.quit()
 
