@@ -4,11 +4,9 @@ import os
 from rich import print
 
 def has(words: list) -> list:
-    # Create query string with OR for multiple words
-    query = " OR ".join([f'"{word}"' for word in words])
-    # print(f"Query being sent: {query}")
 
-    # Step 1: Find note IDs for the query
+    query = " OR ".join([f"{word}" for word in words])
+
     payload = {
         "action": "findNotes",
         "version": 6,
@@ -19,14 +17,9 @@ def has(words: list) -> list:
     response = requests.post("http://localhost:8765", json=payload)
     note_ids = response.json().get('result', [])
 
-    # Debugging: Check if note IDs are found
-    # print(f"Note IDs found: {note_ids}")
-
-    # If no note IDs were found, all words are considered not present
     if not note_ids:
         return [False] * len(words)
 
-    # Step 2: Fetch note fields to confirm matching words
     payload = {
         "action": "notesInfo",
         "version": 6,
@@ -36,21 +29,12 @@ def has(words: list) -> list:
     }
     response = requests.post("http://localhost:8765", json=payload)
     notes = response.json().get('result', [])
-
-    # Debugging: Print fetched note data
-    # print(f"Notes fetched: {json.dumps(notes, indent=4)}")
-
-    # Extract all words from fetched notes safely
     existing_words = set(
         note['fields']['Word']['value']
         for note in notes
         if 'fields' in note and 'Word' in note['fields']
     )
 
-    # Debugging: Verify existing words set
-    # print(f"Existing words in Anki: {existing_words}")
-
-    # Step 3: Compare input words with fetched words
     return [word in existing_words for word in words]
 
 
