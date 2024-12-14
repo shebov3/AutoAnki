@@ -5,8 +5,8 @@ from rich import print
 
 def has(words: list) -> list:
 
-    query = " OR ".join([f"{word}" for word in words])
-
+    query = " OR ".join([f'"{word}"' for word in words])
+    # print(f"Query being sent: {query}")
     payload = {
         "action": "findNotes",
         "version": 6,
@@ -16,7 +16,7 @@ def has(words: list) -> list:
     }
     response = requests.post("http://localhost:8765", json=payload)
     note_ids = response.json().get('result', [])
-
+    # print(f"Note IDs found: {note_ids}")
     if not note_ids:
         return [False] * len(words)
 
@@ -29,11 +29,13 @@ def has(words: list) -> list:
     }
     response = requests.post("http://localhost:8765", json=payload)
     notes = response.json().get('result', [])
+    # print(f"Notes fetched: {json.dumps(notes, indent=4)}")
     existing_words = set(
         note['fields']['Word']['value']
         for note in notes
         if 'fields' in note and 'Word' in note['fields']
     )
+    # print(f"Existing words in Anki: {existing_words}")
 
     return [word in existing_words for word in words]
 
