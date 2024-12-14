@@ -1,4 +1,4 @@
-import spacy
+import spacy, re
 
 nlp = spacy.load('ja_core_news_sm')
 
@@ -16,7 +16,9 @@ def tokenize(text: str) -> dict[str, int]:
         and not token.is_stop  
         and not token.text == "\u3000"  
         and not token.like_num  
-        and len(token.text.strip()) > 1  
+        and token.lang_ == "ja"
+        and not re.match(r'^[A-Za-z0-9:]+$', token.text)
+
     ]
     
     token_counts = {}
